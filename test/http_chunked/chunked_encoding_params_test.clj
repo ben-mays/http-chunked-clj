@@ -20,7 +20,7 @@
   (java.io.ByteArrayInputStream. (.getBytes string)))
 
 (defn make-request
-  [body-str use-chunked-encoding?] 
+  [data use-chunked-encoding?] 
   (let [request {:headers []
                  :body (str->bais body-str)}]
        (if use-chunked-encoding? 
@@ -29,10 +29,10 @@
 
 (deftest test-extract-on-well-formed
   (testing "Extraction of properties on well formed input."
-    (let [input-str "4\r\n1234\r\n0\r\n"
-          request (make-request input-str true)
+    (let [input [4 \return \newline 1234 \return \newline 0 \return \newline]
+          request (make-request input true)
           chunk-map (extract-chunked-map request)]
-      (is (= 4 (:size chunk-map)))
+      (is (= "4" (:size chunk-map)))
       (is (= [49 50 51 52] 
              (into [] (make-byte-array (:data chunk-map)))))
       (is (= "0" (:end chunk-map))))))
